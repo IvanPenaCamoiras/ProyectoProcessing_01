@@ -1,3 +1,6 @@
+PVector[] muros;
+float ancho_muro, alto_muro;
+int muros_num;
 
 float pj_vel = 5;
 float pj_size = 10;
@@ -19,6 +22,17 @@ void setup()
   size(600, 600);
  
   // Inicializamos la posicion del jugador en medio de la ventana
+  muros_num = (int)random(6, 20);
+  
+  muros = new PVector[muros_num];
+  ancho_muro = width / random(5, 20);
+  alto_muro = height / random(20, 50);
+  
+   for (int i=0; i<muros_num; i++) {
+    muros[i] = new PVector(0, 0); // Reservamos cuantas coords por elemento
+    muros[i].x = random(0, width - ancho_muro); // Coord X punto inferior izquierdo
+    muros[i].y = random(0, height - alto_muro); // Coord Y punto inferior izquierdo
+   }
   pj_pos = new PVector(width / 2.0, height / 2.0);
   pnj1_pos = new PVector(random(0, width), random (0, height));
   pnj2_pos = new PVector(random(0, width), random (0, height));
@@ -61,16 +75,7 @@ void draw()
     pnj2_pos.x = MoveTowards(pnj2_pos.x, pj_pos.x, pnj2_vel);
     pnj2_pos.y = MoveTowards(pnj2_pos.y, pj_pos.y, pnj2_vel);
   }
-  
-    //Pintar al PJ
-    fill(0, 255, 0);
-    ellipse(pj_pos.x, pj_pos.y, pj_size, pj_size);
-    
-    //Pintar al PNJ1 i 2
-     fill(0, 0, 255);
-    ellipse(pnj1_pos.x, pnj1_pos.y, pnj1_size, pnj1_size);
-     fill(255, 0, 0);
-    ellipse(pnj2_pos.x, pnj2_pos.y, pnj2_size, pnj2_size);
+  DrawInstances();
 }
 
 void KeyPressed()
@@ -97,4 +102,30 @@ float MoveTowards(float thisPoint, float finalPoint, float speed)
 {
   float move = (1.0 - speed * alfa) * thisPoint + speed * alfa * finalPoint;
   return move;
+}
+
+float MoveAway(float thisPoint, float finalPoint, float speed)
+{
+  float move = (1.0 + speed * alfa) * thisPoint - speed * alfa * finalPoint;
+  return move;
+}
+
+void DrawInstances()
+{
+   //Pintar al PJ
+    fill(0, 255, 0);
+    ellipse(pj_pos.x, pj_pos.y, pj_size, pj_size);
+    
+    //Pintar al PNJ1 i 2
+     fill(0, 0, 255);
+    ellipse(pnj1_pos.x, pnj1_pos.y, pnj1_size, pnj1_size);
+     fill(255, 0, 0);
+    ellipse(pnj2_pos.x, pnj2_pos.y, pnj2_size, pnj2_size);
+    
+    rectMode(CENTER);
+     for(int i = 0; i < muros_num; i++)
+     {
+        fill(255, 0, 0);
+        rect(muros[i].x + ancho_muro/2.0, muros[i].y + alto_muro/2.0, ancho_muro, alto_muro);
+     }
 }
