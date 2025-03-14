@@ -3,7 +3,7 @@ float ancho_muro, alto_muro;
 int muros_num;
 
 float pj_vel = 5;
-float pj_size = 10;
+float pj_size = 20;
 float pnj1_size = 20;
 float pnj2_size = 15;
 float pnj1_dist = 25;
@@ -12,6 +12,7 @@ float pnj1_vel = 0.5;
 float pnj2_vel = 0.2;
 float alfa = 0.1;
 boolean using_mouse = false;
+boolean colision = false;
 PVector pj_pos;
 PVector pnj1_pos;
 PVector pnj2_pos;
@@ -57,6 +58,7 @@ void draw()
     if (key == 's' || key == 'S') {
       pj_pos.y += pj_vel;
     }
+    colision = Colision();
   }
   if (using_mouse)
   {
@@ -113,7 +115,14 @@ float MoveAway(float thisPoint, float finalPoint, float speed)
 void DrawInstances()
 {
    //Pintar al PJ
+   if (colision)
+   {
     fill(0, 255, 0);
+   }
+   else
+   {
+     fill(255, 0, 0);
+   }
     ellipse(pj_pos.x, pj_pos.y, pj_size, pj_size);
     
     //Pintar al PNJ1 i 2
@@ -129,3 +138,36 @@ void DrawInstances()
         rect(muros[i].x + ancho_muro/2.0, muros[i].y + alto_muro/2.0, ancho_muro, alto_muro);
      }
 }
+
+Boolean Colision()
+{
+    float pj_max_x = pj_pos.x + pj_size / 2;
+    float pj_max_y = pj_pos.y + pj_size / 2;
+    float pj_min_x = pj_pos.x - pj_size / 2;
+    float pj_min_y = pj_pos.y - pj_size / 2;
+    
+    // Caja 1 con la 2: xmax1 > xmin2 - Caja 2 con la 1: xmax2 > xmin1
+    // Caja 1 con la 2: ymax1 > ymin2 - Caja 2 con la 1: ymax2 > ymin1
+    // Suponemos que el PJ es 1 y el muro es 2
+    //if (((PJ_max.x > muros[i].x)||(coord_max_muro.x > PJ_min.x))
+    //&&
+    //((PJ_max.y > muros[i].y)||(coord_max_muro.y > PJ_min.y))) {
+      
+    for(int i = 0; i < muros_num; i++)
+    {
+      PVector max_muro = new PVector(0,0);
+
+      max_muro.x = muros[i].x + ancho_muro;
+      max_muro.y = muros[i].y + alto_muro;
+
+      if (pj_max_x < max_muro.x - ancho_muro || pj_max_y < max_muro.y - alto_muro || max_muro.x < pj_min_x || max_muro.y < pj_min_y) 
+      {
+        continue;
+      }
+      else
+      {
+        return true;
+      }
+    }
+    return false;
+ }
