@@ -53,13 +53,13 @@ void draw()
   // la distancia establecida en el pnj1_dist que acerque
   if (DistanceBetween(pnj1_pos, pj_pos) > pnj1_dist)
   {
-    pnj1_pos.x = (1.0 - alfa) * pnj1_pos.x + alfa * pj_pos.x;
-    pnj1_pos.y = (1.0 - alfa) * pnj1_pos.y + alfa * pj_pos.y;
+    pnj1_pos.x = MoveTowards(pnj1_pos.x, pj_pos.x, pnj1_vel);
+    pnj1_pos.y = MoveTowards(pnj1_pos.y, pj_pos.y, pnj1_vel);
   }
    if (DistanceBetween(pnj2_pos, pj_pos) > pnj2_dist)
   {
-    pnj2_pos.x = (1.0 - alfa) * pnj2_pos.x + alfa * pj_pos.x;
-    pnj2_pos.y = (1.0 - alfa) * pnj2_pos.y + alfa * pj_pos.y;
+    pnj2_pos.x = MoveTowards(pnj2_pos.x, pj_pos.x, pnj2_vel);
+    pnj2_pos.y = MoveTowards(pnj2_pos.y, pj_pos.y, pnj2_vel);
   }
   
     //Pintar al PJ
@@ -91,4 +91,10 @@ void KeyPressed()
 float DistanceBetween(PVector point1, PVector point2)
 {
   return sqrt(pow(point2.x - point1.x, 2.0) + pow(point2.y - point1.y, 2.0));
+}
+
+float MoveTowards(float thisPoint, float finalPoint, float speed)
+{
+  float move = (1.0 - speed * alfa) * thisPoint + speed * alfa * finalPoint;
+  return move;
 }
