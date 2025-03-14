@@ -8,6 +8,7 @@ float pnj2_dist = 75;
 float pnj1_vel = 0.5;
 float pnj2_vel = 0.2;
 float alfa = 0.1;
+boolean using_mouse = false;
 PVector pj_pos;
 PVector pnj1_pos;
 PVector pnj2_pos;
@@ -42,6 +43,22 @@ void draw()
     if (key == 's' || key == 'S') {
       pj_pos.y += pj_vel;
     }
+    if (key == 'g' || key == 'G')
+    {
+      if (using_mouse)
+      {
+        using_mouse = false;
+      }
+      else
+      {
+        using_mouse = true;
+      }
+    }
+  }
+  else if (using_mouse)
+  {
+    pj_pos.y = mouseY;
+    pj_pos.x = mouseX;
   }
   // Si la distancia entre el pj y el pnj1 es mayor a 
   // la distancia establecida en el pnj1_dist que acerque
