@@ -43,31 +43,20 @@ void draw()
     if (key == 's' || key == 'S') {
       pj_pos.y += pj_vel;
     }
-    if (key == 'g' || key == 'G')
-    {
-      if (using_mouse)
-      {
-        using_mouse = false;
-      }
-      else
-      {
-        using_mouse = true;
-      }
-    }
   }
-  else if (using_mouse)
+  if (using_mouse)
   {
     pj_pos.y = mouseY;
     pj_pos.x = mouseX;
   }
   // Si la distancia entre el pj y el pnj1 es mayor a 
   // la distancia establecida en el pnj1_dist que acerque
-  if (sqrt(pow(pnj1_pos.x - pj_pos.x, 2.0) + pow(pnj1_pos.y - pj_pos.y, 2.0)) > pnj1_dist)
+  if (DistanceBetween(pnj1_pos, pj_pos) > pnj1_dist)
   {
     pnj1_pos.x = (1.0 - alfa) * pnj1_pos.x + alfa * pj_pos.x;
     pnj1_pos.y = (1.0 - alfa) * pnj1_pos.y + alfa * pj_pos.y;
   }
-   if (sqrt(pow(pnj2_pos.x - pj_pos.x, 2.0) + pow(pnj2_pos.y - pj_pos.y, 2.0)) > pnj2_dist)
+   if (DistanceBetween(pnj2_pos, pj_pos) > pnj2_dist)
   {
     pnj2_pos.x = (1.0 - alfa) * pnj2_pos.x + alfa * pj_pos.x;
     pnj2_pos.y = (1.0 - alfa) * pnj2_pos.y + alfa * pj_pos.y;
@@ -82,4 +71,24 @@ void draw()
     ellipse(pnj1_pos.x, pnj1_pos.y, pnj1_size, pnj1_size);
      fill(255, 0, 0);
     ellipse(pnj2_pos.x, pnj2_pos.y, pnj2_size, pnj2_size);
+}
+
+void KeyPressed()
+{
+   if (key == 'g' || key == 'G')
+    {
+      if (using_mouse)
+      {
+        using_mouse = false;
+      }
+      else
+      {
+        using_mouse = true;
+      }
+    }
+}
+
+float DistanceBetween(PVector point1, PVector point2)
+{
+  return sqrt(pow(point2.x - point1.x, 2.0) + pow(point2.y - point1.y, 2.0));
 }
