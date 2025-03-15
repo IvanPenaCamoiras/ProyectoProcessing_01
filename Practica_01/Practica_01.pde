@@ -4,24 +4,40 @@ int muros_num;
 
 float pj_vel = 5;
 float pj_size = 20;
-float pnj1_size = 20;
-float pnj2_size = 15;
-float pnj1_dist = 25;
-float pnj2_dist = 75;
-float pnj1_vel = 0.5;
-float pnj2_vel = 0.2;
+
 float alfa = 0.1;
+
+float WallDamage = 0.5;
+
+public class Pnj {
+  boolean isDead = false;
+    float vel;
+    float size;
+    float dist;
+    float hp;
+    PVector pos = new PVector(random(0, width), random (0, height));
+}
+
 boolean using_mouse = false;
 boolean colision = false;
 PVector pj_pos;
-PVector pnj1_pos;
-PVector pnj2_pos;
 
-void setup()
-{
+Pnj pnj1 = new Pnj();
+Pnj pnj2 = new Pnj();
+
+
+void setup() {
   // Creamos la ventana
   size(600, 600);
- 
+  pnj1.vel = 0.5;
+  pnj1.size = 20.0;
+  pnj1.dist = 25.0;
+  pnj1.hp = 100;
+  pnj2.vel = 0.2;
+  pnj2.size = 15.0;
+  pnj2.dist = 75.0;
+  pnj2.hp = 100;
+  
   // Inicializamos la posicion del jugador en medio de la ventana
   muros_num = (int)random(6, 20);
   
@@ -35,8 +51,6 @@ void setup()
     muros[i].y = random(0, height - alto_muro); // Coord Y punto inferior izquierdo
    }
   pj_pos = new PVector(width / 2.0, height / 2.0);
-  pnj1_pos = new PVector(random(0, width), random (0, height));
-  pnj2_pos = new PVector(random(0, width), random (0, height));
 }
 
 void draw()
@@ -58,7 +72,7 @@ void draw()
     if (key == 's' || key == 'S') {
       pj_pos.y += pj_vel;
     }
-    colision = Colision();
+    colision = WallColision(pj_pos, pj_size);
   }
   if (using_mouse)
   {
@@ -67,17 +81,21 @@ void draw()
   }
   // Si la distancia entre el pj y el pnj1 es mayor a 
   // la distancia establecida en el pnj1_dist que acerque
-  if (DistanceBetween(pnj1_pos, pj_pos) > pnj1_dist)
+  if (DistanceBetween(pnj1.pos, pj_pos) > pnj1.dist)
   {
-    pnj1_pos.x = MoveTowards(pnj1_pos.x, pj_pos.x, pnj1_vel);
-    pnj1_pos.y = MoveTowards(pnj1_pos.y, pj_pos.y, pnj1_vel);
+    pnj1.pos.x = MoveTowards(pnj1.pos.x, pj_pos.x, pnj1.vel);
+    pnj1.pos.y = MoveTowards(pnj1.pos.y, pj_pos.y, pnj1.vel);
   }
-   if (DistanceBetween(pnj2_pos, pj_pos) > pnj2_dist)
+   if (DistanceBetween(pnj2.pos, pj_pos) > pnj2.dist)
   {
-    pnj2_pos.x = MoveTowards(pnj2_pos.x, pj_pos.x, pnj2_vel);
-    pnj2_pos.y = MoveTowards(pnj2_pos.y, pj_pos.y, pnj2_vel);
+    pnj2.pos.x = MoveTowards(pnj2.pos.x, pj_pos.x, pnj2.vel);
+    pnj2.pos.y = MoveTowards(pnj2.pos.y, pj_pos.y, pnj2.vel);
   }
   DrawInstances();
+    if (WallColision(pnj2.pos, pnj2.size))
+  {
+      GetDamage(pnj2, WallDamage);
+  }
 }
 
 void KeyPressed()
@@ -112,39 +130,12 @@ float MoveAway(float thisPoint, float finalPoint, float speed)
   return move;
 }
 
-void DrawInstances()
+Boolean WallColision(PVector p, float p_size)
 {
-   //Pintar al PJ
-   if (colision)
-   {
-    fill(0, 255, 0);
-   }
-   else
-   {
-     fill(255, 0, 0);
-   }
-    ellipse(pj_pos.x, pj_pos.y, pj_size, pj_size);
-    
-    //Pintar al PNJ1 i 2
-     fill(0, 0, 255);
-    ellipse(pnj1_pos.x, pnj1_pos.y, pnj1_size, pnj1_size);
-     fill(255, 0, 0);
-    ellipse(pnj2_pos.x, pnj2_pos.y, pnj2_size, pnj2_size);
-    
-    rectMode(CENTER);
-     for(int i = 0; i < muros_num; i++)
-     {
-        fill(255, 0, 0);
-        rect(muros[i].x + ancho_muro/2.0, muros[i].y + alto_muro/2.0, ancho_muro, alto_muro);
-     }
-}
-
-Boolean Colision()
-{
-    float pj_max_x = pj_pos.x + pj_size / 2;
-    float pj_max_y = pj_pos.y + pj_size / 2;
-    float pj_min_x = pj_pos.x - pj_size / 2;
-    float pj_min_y = pj_pos.y - pj_size / 2;
+    float p_max_x = p.x + p_size / 2;
+    float p_max_y = p.y + p_size / 2;
+    float p_min_x = p.x - p_size / 2;
+    float p_min_y = p.y - p_size / 2;
     
     // Caja 1 con la 2: xmax1 > xmin2 - Caja 2 con la 1: xmax2 > xmin1
     // Caja 1 con la 2: ymax1 > ymin2 - Caja 2 con la 1: ymax2 > ymin1
@@ -160,7 +151,7 @@ Boolean Colision()
       max_muro.x = muros[i].x + ancho_muro;
       max_muro.y = muros[i].y + alto_muro;
 
-      if (pj_max_x < max_muro.x - ancho_muro || pj_max_y < max_muro.y - alto_muro || max_muro.x < pj_min_x || max_muro.y < pj_min_y) 
+      if (p_max_x < max_muro.x - ancho_muro || p_max_y < max_muro.y - alto_muro || max_muro.x < p_min_x || max_muro.y < p_min_y) 
       {
         continue;
       }
@@ -171,3 +162,45 @@ Boolean Colision()
     }
     return false;
  }
+
+void DrawInstances()
+{
+   //Pintar al PJ
+   if (colision)
+   {
+    fill(0, 255, 0);
+   }
+   else
+   {
+     fill(255, 0, 0);
+   }
+    ellipse(pj_pos.x, pj_pos.y, pj_size, pj_size);
+    
+    //Pintar al PNJ1 i 2
+    if (!pnj1.isDead)
+    {
+      fill(0, 0, 255);
+      ellipse(pnj1.pos.x, pnj1.pos.y, pnj1.size, pnj1.size);
+    }
+    if (!pnj2.isDead)
+    {
+      fill(255, 0, 0);
+      ellipse(pnj2.pos.x, pnj2.pos.y, pnj2.size, pnj2.size);
+    }
+     
+    rectMode(CENTER);
+     for(int i = 0; i < muros_num; i++)
+     {
+        fill(255, 0, 0);
+        rect(muros[i].x + ancho_muro/2.0, muros[i].y + alto_muro/2.0, ancho_muro, alto_muro);
+     }
+}
+
+void GetDamage(Pnj pnj, float damage)
+{
+  pnj.hp -= damage;
+  if (pnj.hp <= 0)
+  {
+    pnj.isDead = true;
+  }
+}
