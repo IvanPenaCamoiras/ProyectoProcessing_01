@@ -14,13 +14,37 @@ boolean colision = false;
 
 boolean using_mouse = false;
 
-public enum Item_type {VEL, FREEZE, INMORTAL, CURE, DAMAGE, VENOM, SLOW, COUNT};
+public enum Item_type {VEL, FREEZE, INMORTAL, CURE, DAMAGE, VENOM, SLOW};
+int type_num = 6;
 
 public class Item {
   boolean powerUp;
   boolean isTaken = false;
   Item_type type;
   PVector pos;
+  
+  Item_type Type(int num)
+  {
+    switch(num)
+    {
+      case 0: 
+        return Item_type.VEL;
+      case 1:
+        return Item_type.FREEZE;
+      case 2: 
+        return Item_type.INMORTAL;
+      case 3: 
+        return Item_type.CURE;
+      case 4: 
+        return Item_type.DAMAGE;
+      case 5:
+        return Item_type.VENOM;
+      case 6:
+        return Item_type.SLOW;
+      default:
+        return Item_type.SLOW;
+    }
+  }
 }
 
 public class Pnj {
@@ -91,9 +115,11 @@ void setup() {
   
   // Inicializamos la posición de los muros
    for (int i=0; i<muros_num; i++) {
-    muros[i] = new PVector(0, 0); // Reservamos cuantas coords por elemento
-    muros[i].x = random(0, width - ancho_muro); // Coord X punto inferior izquierdo
-    muros[i].y = random(0, height - alto_muro); // Coord Y punto inferior izquierdo
+     muros[i] = new PVector(0, 0); // Reservamos cuantas coords por elemento
+     do {  
+     muros[i].x = random(0, width - ancho_muro); // Coord X punto inferior izquierdo
+     muros[i].y = random(0, height - alto_muro); // Coord Y punto inferior izquierdo
+     } while (WallColision(muros[i], ancho_muro, alto_muro, i));
    }
   
   //Inicializamos los ítems
@@ -115,12 +141,12 @@ void setup() {
     if (i < 3)
     {
       items[i].powerUp = true;
-      items[i].type = (enum)random(0, 3);
+      items[i].type = items[i].Type((int)random(0, 3));
     }
     else
     {
       items[i].powerUp = false;
-      items[i].type = (enum)random(4, COUNT);
+      items[i].type = items[i].Type((int)random(4, type_num - 1));
     }
   }
   
@@ -133,20 +159,24 @@ void draw()
   background(255);
   // KEY PRESSED
   
-  // Movimiento del PJ (WASD)
+  //Movimiento del PJ (WASD)
   if (keyPressed) {
     if (key == 'w' || key == 'W') {
       pj_pos.y -= pj_vel;
     }
-    if (key == 'd' || key == 'D') {
+    else if (key == 'd' || key == 'D') {
       pj_pos.x += pj_vel;
     }
-    if (key == 'a' || key == 'A') {
+    else if (key == 'a' || key == 'A') {
       pj_pos.x -= pj_vel;
     }
-    if (key == 's' || key == 'S') {
+    else if (key == 's' || key == 'S') {
       pj_pos.y += pj_vel;
     }
+    //float dir_x = keyPressed ? key == 'd' || key == 'D' ? 1 : key == 'a' || key == 'A' ? -1 : 0 : 0;
+    //float dir_y = keyPressed ? key == 's' || key == 'S' ? 1 : key == 'w' || key == 'W' ? -1 : 0 : 0;
+    //pj_pos.x += dir_x * pj_vel;
+    //pj_pos.y += dir_y * pj_vel;
     colision = WallColision(pj_pos, pj_size);
   }
   if (using_mouse)
@@ -167,6 +197,7 @@ void draw()
     pnj2.pos.y = MoveTowards(pnj2.pos.y, pj_pos.y, pnj2.vel);
   }
   DrawInstances();
+  
     if (WallColision(pnj2.pos, pnj2.size))
   {
       GetDamage(pnj2, WallDamage);
@@ -207,7 +238,6 @@ float MoveAway(float thisPoint, float finalPoint, float speed)
 
 Boolean FreeSpot(PVector pos, int index)
 {
-  pos = new PVector(0,0);
   if (WallColision(pos, items_size))
   {
     return false;
@@ -226,12 +256,38 @@ Boolean FreeSpot(PVector pos, int index)
   return true;
 }
 
-Boolean WallColision(PVector p, float p_size)
+Boolean WallColision(PVector p, float size)
 {
-    float p_max_x = p.x + p_size / 2;
-    float p_max_y = p.y + p_size / 2;
-    float p_min_x = p.x - p_size / 2;
-    float p_min_y = p.y - p_size / 2;
+    float p_max_x = p.x + size / 2;
+    float p_max_y = p.y + size / 2;
+    float p_min_x = p.x - size / 2;
+    float p_min_y = p.y - size / 2;
+      
+    for(int i = 0; i < muros_num; i++)
+    {
+      PVector max_muro = new PVector(0,0);
+
+      max_muro.x = muros[i].x + ancho_muro;
+      max_muro.y = muros[i].y + alto_muro;
+
+      if (p_max_x < max_muro.x - ancho_muro || p_max_y < max_muro.y - alto_muro || max_muro.x < p_min_x || max_muro.y < p_min_y) 
+      {
+        continue;
+      }
+      else
+      {
+        return true;
+      }
+    }
+    return false;
+ }
+
+Boolean WallColision(PVector p, float size, int index)
+{
+    float p_max_x = p.x + size / 2;
+    float p_max_y = p.y + size / 2;
+    float p_min_x = p.x - size / 2;
+    float p_min_y = p.y - size / 2;
     
     // Caja 1 con la 2: xmax1 > xmin2 - Caja 2 con la 1: xmax2 > xmin1
     // Caja 1 con la 2: ymax1 > ymin2 - Caja 2 con la 1: ymax2 > ymin1
@@ -240,7 +296,33 @@ Boolean WallColision(PVector p, float p_size)
     //&&
     //((PJ_max.y > muros[i].y)||(coord_max_muro.y > PJ_min.y))) {
       
-    for(int i = 0; i < muros_num; i++)
+    for(int i = 0; i < index; i++)
+    {
+      PVector max_muro = new PVector(0,0);
+
+      max_muro.x = muros[i].x + ancho_muro;
+      max_muro.y = muros[i].y + alto_muro;
+
+      if (p_max_x < max_muro.x - ancho_muro || p_max_y < max_muro.y - alto_muro || max_muro.x < p_min_x || max_muro.y < p_min_y) 
+      {
+        continue;
+      }
+      else
+      {
+        return true;
+      }
+    }
+    return false;
+ }
+
+Boolean WallColision(PVector p, float x_size, float y_size, int index)
+{
+    float p_max_x = p.x + x_size / 2;
+    float p_max_y = p.y + y_size / 2;
+    float p_min_x = p.x - x_size / 2;
+    float p_min_y = p.y - y_size / 2;
+      
+    for(int i = 0; i < index; i++)
     {
       PVector max_muro = new PVector(0,0);
 
