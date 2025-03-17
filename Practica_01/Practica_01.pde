@@ -1,21 +1,26 @@
+//Variables de muros
 PVector[] muros;
 float ancho_muro, alto_muro;
+float WallDamage = 0.5;
 int muros_num;
 
+//Variables de Jugador
 float pj_vel = 5;
 float pj_size = 20;
+PVector pj_pos;
 
 float alfa = 0.1;
+boolean colision = false;
 
-float WallDamage = 0.5;
+boolean using_mouse = false;
 
-public enum Item_type {VEL, FREEZE, INMORTAL, CURE, DAMAGE, VENOM, SLOW};
+public enum Item_type {VEL, FREEZE, INMORTAL, CURE, DAMAGE, VENOM, SLOW, COUNT};
 
 public class Item {
-  boolean isTaken;
+  boolean powerUp;
+  boolean isTaken = false;
   Item_type type;
-  PVector pos = new PVector(0,0);
-  float size;
+  PVector pos;
 }
 
 public class Pnj {
@@ -53,16 +58,19 @@ public class Timer {
   }
 }
 
-boolean using_mouse = false;
-boolean colision = false;
-PVector pj_pos;
-
 Pnj pnj1 = new Pnj();
 Pnj pnj2 = new Pnj();
+
+// Variables de Item
+Item[] items;
+int items_num;
+int items_size = 10;
 
 void setup() {
   // Creamos la ventana
   size(600, 600);
+  
+  //Inicializamos las variables de los PNJ
   pnj1.vel = 0.5;
   pnj1.size = 20.0;
   pnj1.dist = 25.0;
@@ -72,18 +80,51 @@ void setup() {
   pnj2.dist = 75.0;
   pnj2.hp = 100;
   
-  // Inicializamos la posicion del jugador en medio de la ventana
+  // Inicializamos los muros
+  // El número de muros es un número aleatorio entre 6 y 20
   muros_num = (int)random(6, 20);
   
+  // Inicializamos el array y la mida de los muros, también es aleatoria.
   muros = new PVector[muros_num];
   ancho_muro = width / random(5, 20);
   alto_muro = height / random(20, 50);
   
+  // Inicializamos la posición de los muros
    for (int i=0; i<muros_num; i++) {
     muros[i] = new PVector(0, 0); // Reservamos cuantas coords por elemento
     muros[i].x = random(0, width - ancho_muro); // Coord X punto inferior izquierdo
     muros[i].y = random(0, height - alto_muro); // Coord Y punto inferior izquierdo
    }
+  
+  //Inicializamos los ítems
+  //El número de ítems es un número aleatorio
+  items_num = (int)random(6, 12);
+  
+  //Inicializamos el array de ítems
+  items = new Item[items_num];
+  
+  for(int i = 0; i < items_num; i++)
+  {
+    items[i] = new Item();
+    items[i].pos = new PVector(0,0);
+    do 
+    {
+      items[i].pos.x = random(0, width - items_size);
+      items[i].pos.y = random(0, height - items_size);
+    } while (!FreeSpot(items[i].pos, i));
+    if (i < 3)
+    {
+      items[i].powerUp = true;
+      items[i].type = (enum)random(0, 3);
+    }
+    else
+    {
+      items[i].powerUp = false;
+      items[i].type = (enum)random(4, COUNT);
+    }
+  }
+  
+  // Inicializamos la posicion del jugador en medio de la ventana
   pj_pos = new PVector(width / 2.0, height / 2.0);
 }
 
@@ -164,6 +205,27 @@ float MoveAway(float thisPoint, float finalPoint, float speed)
   return move;
 }
 
+Boolean FreeSpot(PVector pos, int index)
+{
+  pos = new PVector(0,0);
+  if (WallColision(pos, items_size))
+  {
+    return false;
+  }
+  for(int i = 0; i < index; i++)
+  {
+    if (DistanceBetween(pos, items[i].pos) >= items_size)
+    {
+      continue;
+    }
+    else
+    {
+      return false;
+    }
+  }
+  return true;
+}
+
 Boolean WallColision(PVector p, float p_size)
 {
     float p_max_x = p.x + p_size / 2;
@@ -227,6 +289,12 @@ void DrawInstances()
      {
         fill(255, 0, 0);
         rect(muros[i].x + ancho_muro/2.0, muros[i].y + alto_muro/2.0, ancho_muro, alto_muro);
+     }
+     
+      for(int i = 0; i < items_num; i++)
+     {
+        fill(0, 255, 0);
+        ellipse(items[i].pos.x, items[i].pos.y, items_size, items_size);
      }
 }
 
