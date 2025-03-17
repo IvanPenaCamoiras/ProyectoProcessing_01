@@ -9,6 +9,15 @@ float alfa = 0.1;
 
 float WallDamage = 0.5;
 
+public enum Item_type {VEL, FREEZE, INMORTAL, CURE, DAMAGE, VENOM, SLOW};
+
+public class Item {
+  boolean isTaken;
+  Item_type type;
+  PVector pos = new PVector(0,0);
+  float size;
+}
+
 public class Pnj {
   boolean isDead = false;
     float vel;
@@ -18,13 +27,38 @@ public class Pnj {
     PVector pos = new PVector(random(0, width), random (0, height));
 }
 
+public class Timer {
+  boolean isStarted = false;
+  float finalTime = 0;
+  
+  void StartTimer(float time)
+  {
+    if (!isStarted)
+    {
+       finalTime = millis() + time;
+       isStarted = true;
+    }  
+  }
+  boolean CheckTimer()
+  {
+    if (millis() >= finalTime)
+    {
+      isStarted = false;
+      return true;
+    }
+    else
+    {
+      return false;
+    }
+  }
+}
+
 boolean using_mouse = false;
 boolean colision = false;
 PVector pj_pos;
 
 Pnj pnj1 = new Pnj();
 Pnj pnj2 = new Pnj();
-
 
 void setup() {
   // Creamos la ventana
