@@ -82,8 +82,22 @@ public class Timer {
   }
 }
 
+class Enemy {
+  float vel;
+  float size;
+  float detectionDistance;
+  PVector pos;
+  boolean isDead = false;
+  
+}
+
 Pnj pnj1 = new Pnj();
 Pnj pnj2 = new Pnj();
+
+// Variables de Enemy
+
+int enemyNum;
+int enemySpawnTime;
 
 // Variables de Item
 Item[] items;
@@ -158,7 +172,8 @@ void draw()
 {
   background(255);
   // KEY PRESSED
-  
+  textSize(20);
+  text(using_mouse ? "Control: Ratón" : "Control: Teclado", 10,20 );
   //Movimiento del PJ (WASD)
   if (keyPressed) {
     if (key == 'w' || key == 'W') {
