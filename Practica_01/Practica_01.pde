@@ -58,8 +58,21 @@ public class Timer {
   }
 }
 
+public class Enemy {
+ PVector pos;
+ float vel;
+ float size;
+ boolean isDead;
+ float detectionDistance;
+ Enemy_type type;
+}
+
 Pnj pnj1 = new Pnj();
 Pnj pnj2 = new Pnj();
+
+// Variables de Enemy
+Enemy[] enemies;
+float spawnEnemiesTime;
 
 // Variables de Item
 Item[] items;
